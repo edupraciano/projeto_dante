@@ -33,7 +33,6 @@
 <body>
 
   <div>
-    <h3>Usuário</h3>
     <label for="user_name">Usuário</label>
     <input type="text" name="" id="user_name">
     <label for="password">Senha</label>
@@ -95,9 +94,16 @@
 
 <script>
   var minhaUrl =
-    "https://script.google.com/macros/s/AKfycbzI2wJkT8lM3jni7GMlGrWw2_FjhC5Pf9VIXxgDCRb6_W_IK9fEyRnuZgZQxUFjLGDT/exec";
+    "https://script.google.com/macros/s/AKfycbzk9EsptA9Rs0tFCH2XN47l8LlASQbtABFjNDyejAwZPKb5iw_LfJAr7Rtr96jF7TpV/exec";
 
   function excluirEsteId() {
+    ////////  PARTE DA AUTENTICAÇÃO DO USUÁRIO ////////////////   
+    var coockie_split = document.cookie.split(';');
+    user_name = coockie_split[0].split('=')[1];
+    password = coockie_split[1].split('=')[1];
+    console.log(user_name);
+    console.log(password);
+    /////////////////////////////////////////////////////////
     var idDoFuncionario = document.getElementById('idDoFuncionario').value;
 
     if (idDoFuncionario == "") {
@@ -108,6 +114,8 @@
         data: {
           qualFuncao: "remover_funcionario",
           idDoFuncionario: idDoFuncionario,
+          user_name: user_name,
+          password: password,
         },
         url: minhaUrl,
       }).done(function () {
@@ -134,6 +142,14 @@
     var cargoDoFuncionario = document.getElementById("cargoDoFuncionario").value;
     var salarioDoFuncionario = document.getElementById("salarioDoFuncionario").value;
 
+    ////////  PARTE DA AUTENTICAÇÃO DO USUÁRIO ////////////////   
+    var coockie_split = document.cookie.split(';');
+    user_name = coockie_split[0].split('=')[1];
+    password = coockie_split[1].split('=')[1];
+    console.log(user_name);
+    console.log(password);
+    /////////////////////////////////////////////////////////
+
     $.ajax({
       type: "POST",
       data: {
@@ -142,6 +158,8 @@
         nomeDoFuncionario: nomeDoFuncionario,
         cargoDoFuncionario: cargoDoFuncionario,
         salarioDoFuncionario: salarioDoFuncionario,
+        user_name: user_name,
+        password: password,
       },
       url: minhaUrl,
     }).done(function () {
@@ -156,10 +174,19 @@
   }
 
   function lerDadosDaTabela() {
+    ////////  PARTE DA AUTENTICAÇÃO DO USUÁRIO ////////////////   
+    var coockie_split = document.cookie.split(';');
+    user_name = coockie_split[0].split('=')[1];
+    password = coockie_split[1].split('=')[1];
+    console.log(user_name);
+    console.log(password);
+    /////////////////////////////////////////////////////////
 
     $.ajax({
       type: "POST",
       data: {
+        user_name: user_name,
+        password: password,
         qualFuncao: 'lerFuncionarios',
       },
       url: minhaUrl,
@@ -223,9 +250,13 @@
     });
   }
 
-
   function btn_logout() {
+    var user_name = document.getElementById("user_name").value;
+    var password = document.getElementById("password").value;
 
+    document.cookie = 'user_name=;';
+    document.cookie = 'password=;';
+    location.reload();
   }
 </script>
 
