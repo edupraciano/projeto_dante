@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+  <title>3ª Tentativa</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base target="_top">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/scroller/2.2.0/css/scroller.dataTables.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/scroller/2.2.0/js/dataTables.scroller.min.js"></script>
+
+  <style>
+    body {
+      background-color: rgb(209, 209, 247);
+      padding: 15px;
+    }
+
+    #formularioDeCadastroDeFuncionario {
+      display: none;
+    }
+
+    #divTabelaDeFuncionarios {
+      display: none;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div id="menuDeNavegacao">
+    <button onclick="abreCadastroDeFuncionarios()">Formulário de Cadastro</button>
+    <button onclick="abreTabelaDeFuncionarios()">Tabela de Funcionário</button>
+  </div>
+
+  <div id="formularioDeCadastroDeFuncionario">
+
+    <h2>Formulário de Cadastro</h2>
+
+    <label for="idDoFuncionario"></label>ID</label>
+    <br>
+    <input type="text" id="idDoFuncionario" disabled>
+    <br>
+    <br>
+    <label for="nomeDoFuncionario">NOME</label>
+    <br>
+    <input type="text" id="nomeDoFuncionario">
+    <br>
+    <br>
+    <label for="cargoDoFuncionario">CARGO</label>
+    <br>
+    <input type="text" id="cargoDoFuncionario">
+    <br>
+    <br>
+    <label for="salarioDoFuncionario">SALÁRIO</label>
+    <br>
+    <input type="text" id="salarioDoFuncionario">
+    <br>
+    <br>
+    <button onclick="disparaAoClicar()">Enviar</button>
+    <button onclick="excluirEsteId()">Excluir</button>
+  </div>
+
+  <div id="divTabelaDeFuncionarios">
+
+    <h2>Tabela de Funcionários</h2>
+
+    <table id="example" class="display nowrap" style="width:100%">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Cargo</th>
+          <th>Salário</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+
+</body>
+
+<script>
+  var minhaUrl =
+    "https://script.google.com/macros/s/AKfycbz4TnpohX4GEB0E5dUYlkpYrEoshtZ-Ytvg2xavyYjf5iKKOZTajxph6VixmXq-1qYv/exec";
+
+  function excluirEsteId() {
+    var idDoFuncionario = document.getElementById('idDoFuncionario').value;
+
+    if (idDoFuncionario == "") {
+      alert('Selecione o Funcionário a ser Excluído!')
+    } else {
+      $.ajax({
+        type: "POST",
+        data: {
+          qualFuncao: "remover_funcionario",
+          idDoFuncionario: idDoFuncionario,
+        },
+        url: minhaUrl,
+      }).done(function () {
+        alert("Funcionário Excluído com Sucesso!");
+        location.reload();
+      })
+    }
+  }
+
+  function abreCadastroDeFuncionarios() {
+    document.getElementById("formularioDeCadastroDeFuncionario").style.display = "block";
+    document.getElementById("divTabelaDeFuncionarios").style.display = "none";
+  }
+
+  function abreTabelaDeFuncionarios() {
+    document.getElementById("divTabelaDeFuncionarios").style.display = "block";
+    document.getElementById("formularioDeCadastroDeFuncionario").style.display = "none";
+    lerDadosDaTabela();
+  }
+
+  function disparaAoClicar() {
+    var idDoFuncionario = document.getElementById("idDoFuncionario").value;
+    var nomeDoFuncionario = document.getElementById("nomeDoFuncionario").value;
+    var cargoDoFuncionario = document.getElementById("cargoDoFuncionario").value;
+    var salarioDoFuncionario = document.getElementById("salarioDoFuncionario").value;
+
+    $.ajax({
+      type: "POST",
+      data: {
+        qualFuncao: 'entradaDeFuncionario',
+        idDoFuncionario: idDoFuncionario,
+        nomeDoFuncionario: nomeDoFuncionario,
+        cargoDoFuncionario: cargoDoFuncionario,
+        salarioDoFuncionario: salarioDoFuncionario,
+      },
+      url: minhaUrl,
+    }).done(function () {
+      document.getElementById("idDoFuncionario").value = " ";
+      document.getElementById("nomeDoFuncionario").value = " ";
+      document.getElementById("cargoDoFuncionario").value = " ";
+      document.getElementById("salarioDoFuncionario").value = " ";
+
+      alert('Funcionário Cadastrado com Sucesso!');
+      location.reload();
+    })
+  }
+
+  function lerDadosDaTabela() {
+
+    $.ajax({
+      type: "POST",
+      data: {
+        qualFuncao: 'lerFuncionarios',
+      },
+      url: minhaUrl,
+    }).done(function (data) {
+      // GERAÇÃO DA TABELA
+
+      try {
+        $("#example").DataTable().clear();
+        $("#example").DataTable().destroy();
+      } catch (e) {
+        console.log(e);
+      }
+      var data = JSON.parse(data);
+
+      new DataTable("#example", {
+        data: data,
+        deferRender: true,
+        scrollCollapse: true,
+        scroller: true,
+        scrollY: 200,
+      });
+
+      // ADICIONANDO UM LISTINER
+      var table = $('#example').DataTable();
+      $('#example tbody').on('click', 'tr', function () {
+        abreCadastroDeFuncionarios();
+        var data = table.row(this).data();
+        document.getElementById("idDoFuncionario").value = data[0];
+        document.getElementById("nomeDoFuncionario").value = data[1];
+        document.getElementById("cargoDoFuncionario").value = data[2];
+        document.getElementById("salarioDoFuncionario").value = data[3];
+      });
+
+
+
+    });
+  };
+</script>
+
+</html>
