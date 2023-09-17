@@ -3,7 +3,7 @@
 
 <head>
 
-  <title>3ª Tentativa</title>
+  <title>Projeto Dante</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base target="_top">
@@ -31,6 +31,16 @@
 </head>
 
 <body>
+
+  <div>
+    <h3>Usuário</h3>
+    <label for="user_name">Usuário</label>
+    <input type="text" name="" id="user_name">
+    <label for="password">Senha</label>
+    <input type="password" name="" id="password">
+    <button onclick="btn_login()">Entrar</button>
+    <button onclick="btn_logout()">Sair</button>
+  </div>
 
   <div id="menuDeNavegacao">
     <button onclick="abreCadastroDeFuncionarios()">Formulário de Cadastro</button>
@@ -85,7 +95,7 @@
 
 <script>
   var minhaUrl =
-    "https://script.google.com/macros/s/AKfycbz4TnpohX4GEB0E5dUYlkpYrEoshtZ-Ytvg2xavyYjf5iKKOZTajxph6VixmXq-1qYv/exec";
+    "https://script.google.com/macros/s/AKfycbzI2wJkT8lM3jni7GMlGrWw2_FjhC5Pf9VIXxgDCRb6_W_IK9fEyRnuZgZQxUFjLGDT/exec";
 
   function excluirEsteId() {
     var idDoFuncionario = document.getElementById('idDoFuncionario').value;
@@ -182,11 +192,41 @@
         document.getElementById("cargoDoFuncionario").value = data[2];
         document.getElementById("salarioDoFuncionario").value = data[3];
       });
-
-
-
     });
-  };
+  }
+
+  function btn_login() {
+    var user_name = document.getElementById("user_name").value;
+    var password = document.getElementById("password").value;
+
+    document.cookie = 'user_name=;';
+    document.cookie = 'password=;';
+
+    document.cookie = 'user_name=' + user_name;
+    document.cookie = 'password=' + password;
+
+    var coockie_split = document.cookie.split(';');
+
+    console.log(coockie_split[0].split('=')[1]);
+    console.log(coockie_split[1].split('=')[1]);
+
+    $.ajax({
+      type: "POST",
+      data: {
+        qualFuncao: "autenticacao",
+        user_name: user_name,
+        password: password,
+      },
+      url: minhaUrl,
+    }).done(function (data) {
+      console.log(data);
+    });
+  }
+
+
+  function btn_logout() {
+
+  }
 </script>
 
 </html>
