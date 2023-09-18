@@ -31,10 +31,9 @@
       display: none;
     } */
 
-    /* #divMeuLogout {
+    #divMeuLogout {
       display: none;
     }
-    */
 
     #menuDeNavegacao {
       display: none;
@@ -57,41 +56,6 @@
     <h3 id="usuarioLogado"></h3>
     <button onclick="btn_logout()">Sair</button>
   </div>
-
-  <script>
-    function btn_login() {
-      var user_name = document.getElementById("user_name").value;
-      var password = document.getElementById("password").value;
-
-      localStorage.setItem('user_name', '');
-      localStorage.setItem('password', '');
-
-      localStorage.setItem('user_name', user_name);
-      localStorage.setItem('password', password);
-
-      $.ajax({
-        type: "POST",
-        data: {
-          qualFuncao: "autenticacao",
-          user_name: user_name,
-          password: password,
-        },
-        url: minhaUrl,
-      }).done(function (data) {
-        location.reload();
-      });
-    }
-
-    function btn_logout() {
-      var user_name = document.getElementById("user_name").value;
-      var password = document.getElementById("password").value;
-
-      localStorage.setItem('user_name', '');
-      localStorage.setItem('password', '');
-
-      location.reload();
-    }
-  </script>
 
   <div id="menuDeNavegacao">
     <button onclick="abreCadastroDeFuncionarios()">Formulário de Cadastro</button>
@@ -146,11 +110,49 @@
 
 <script>
   var minhaUrl =
-    "https://script.google.com/macros/s/AKfycbxmSN0hM-cRoJfEcD4GdNBzzALXj-BYLQUrwHuVzb6vp9TIOQEFmm9cJiDFBCaQSgI1/exec";
+    "https://script.google.com/macros/s/AKfycbwh9kuKrtFlHLIyVfnio7uHDmvO-QDkUxMexMAkUHDdp351sTs7B2fS4WcIh7OJZsjk/exec";
 
   $(document).ready(function () {
     var user_name = localStorage.getItem('user_name');
     var password = localStorage.getItem('password');
+
+    if (user_name == "") {
+      document.getElementById('divMeuLogin').style.display = "block";
+
+    } else {
+      $.ajax({
+        type: "POST",
+        data: {
+          qualFuncao: "autenticacao",
+          user_name: user_name,
+          password: password,
+        },
+        url: minhaUrl,
+      }).done(function (data) {
+        //console.log(data);
+        if (data == "true") {
+          // USUÁRIO LOGADO
+          document.getElementById('divMeuLogout').style.display = "block";
+          document.getElementById('menuDeNavegacao').style.display = 'block';
+          document.getElementById('usuarioLogado').innerHTML = 'Bem vindo(a), ' + user_name;
+        } else {
+          // USUÁRIO NÃO-LOGADO
+          document.getElementById('divMeuLogin').style.display = "block";
+          //document.getElementById('divMeuLogout').style.display = "none";
+        }
+      });
+    };
+  });
+
+  function btn_login() {
+    var user_name = document.getElementById("user_name").value;
+    var password = document.getElementById("password").value;
+
+    localStorage.setItem('user_name', '');
+    localStorage.setItem('password', '');
+
+    localStorage.setItem('user_name', user_name);
+    localStorage.setItem('password', password);
 
     $.ajax({
       type: "POST",
@@ -164,18 +166,49 @@
 
       if (data == "true") {
         // USUÁRIO LOGADO
+        console.log("Usuário Logado.");
+
         document.getElementById('divMeuLogout').style.display = "block";
         document.getElementById('menuDeNavegacao').style.display = 'block';
+        document.getElementById('divMeuLogin').style.display = "none";
         document.getElementById('usuarioLogado').innerHTML = 'Bem vindo(a), ' + user_name;
+
+        console.log("Usuário: " + user_name);
+        console.log("Senha: " + password);
+
       } else {
         // USUÁRIO NÃO-LOGADO
+        alert("Usuário não Localizado!")
+        console.log("Usuário não Localizado!")
         document.getElementById('divMeuLogin').style.display = "block";
         //document.getElementById('divMeuLogout').style.display = "none";
-      }
+      };
     });
-  });
+  }
 
+  function btn_logout() {
+    var user_name = document.getElementById("user_name").value;
+    var password = document.getElementById("password").value;
 
+    localStorage.setItem('user_name', '');
+    localStorage.setItem('password', '');
+
+    document.getElementById('divMeuLogin').style.display = "block";
+    document.getElementById('divMeuLogout').style.display = "none";
+    document.getElementById('menuDeNavegacao').style.display = 'none';
+    document.getElementById('divTabelaDeFuncionarios').style.display = 'none';
+    document.getElementById('formularioDeCadastroDeFuncionario').style.display = 'none';
+
+    try {
+      $("#example").DataTable().clear();
+      $("#example").DataTable().destroy();
+    } catch (e) {
+      console.log(e);
+    }
+
+    document.getElementById("user_name").value = "";
+    document.getElementById("password").value = "";
+  }
 
   function excluirEsteId() {
     var idDoFuncionario = document.getElementById('idDoFuncionario').value;
@@ -186,7 +219,7 @@
     /////////////////////////////////////////////////////////
 
     if (idDoFuncionario == "") {
-      alert('Selecione o Funcionário a ser Excluído!')
+      alert('Selecione o Funcionário a ser Excluído!');
     } else {
       $.ajax({
         type: "POST",
@@ -199,9 +232,9 @@
         url: minhaUrl,
       }).done(function () {
         alert("Funcionário Excluído com Sucesso!");
-        location.reload();
-      })
-    }
+        abreTabelaDeFuncionarios();
+      });
+    };
   }
 
   function abreCadastroDeFuncionarios() {
@@ -245,7 +278,7 @@
       document.getElementById("salarioDoFuncionario").value = " ";
 
       alert('Funcionário Cadastrado com Sucesso!');
-      location.reload();
+      abreTabelaDeFuncionarios();
     })
   }
 
@@ -264,7 +297,6 @@
       },
       url: minhaUrl,
     }).done(function (data) {
-      // GERAÇÃO DA TABELA
 
       try {
         $("#example").DataTable().clear();
@@ -272,6 +304,8 @@
       } catch (e) {
         console.log(e);
       }
+
+      // GERAÇÃO DA TABELA
       var data = JSON.parse(data);
 
       new DataTable("#example", {
