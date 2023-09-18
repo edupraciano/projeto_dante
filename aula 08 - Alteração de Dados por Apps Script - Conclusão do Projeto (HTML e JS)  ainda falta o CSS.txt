@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+  <title>Projeto Dante</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base target="_top">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/scroller/2.2.0/css/scroller.dataTables.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/scroller/2.2.0/js/dataTables.scroller.min.js"></script>
+
+  <style>
+    body {
+      background-color: rgb(209, 209, 247);
+      padding: 15px;
+    }
+
+    #formularioDeCadastroDeFuncionario {
+      display: none;
+    }
+
+    #divTabelaDeFuncionarios {
+      display: none;
+    }
+
+    /* #divMeuLogin {
+      display: none;
+    } */
+
+    #divMeuLogout {
+      display: none;
+    }
+
+    #menuDeNavegacao {
+      display: none;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div id="divMeuLogin">
+    <label for="user_name">Usuário</label>
+    <input type="text" name="" id="user_name">
+    <label for="password">Senha</label>
+    <input type="password" name="" id="password">
+    <button onclick="btn_login()">Entrar</button>
+  </div>
+
+  <div id="divMeuLogout">
+    <h3 id="usuarioLogado"></h3>
+    <button onclick="btn_logout()">Sair</button>
+  </div>
+
+  <div id="menuDeNavegacao">
+    <button onclick="abreCadastroDeFuncionarios()">Formulário de Cadastro</button>
+    <button onclick="abreTabelaDeFuncionarios()">Tabela de Funcionário</button>
+  </div>
+
+  <div id="formularioDeCadastroDeFuncionario">
+
+    <h2>Formulário de Cadastro</h2>
+
+    <label for="idDoFuncionario"></label>ID</label>
+    <br>
+    <input type="text" id="idDoFuncionario" disabled>
+    <br>
+    <br>
+    <label for="nomeDoFuncionario">NOME</label>
+    <br>
+    <input type="text" id="nomeDoFuncionario">
+    <br>
+    <br>
+    <label for="cargoDoFuncionario">CARGO</label>
+    <br>
+    <input type="text" id="cargoDoFuncionario">
+    <br>
+    <br>
+    <label for="salarioDoFuncionario">SALÁRIO</label>
+    <br>
+    <input type="text" id="salarioDoFuncionario">
+    <br>
+    <br>
+    <button onclick="disparaAoClicar()">Enviar</button>
+    <button onclick="excluirEsteId()">Excluir</button>
+  </div>
+
+  <div id="divTabelaDeFuncionarios">
+
+    <h2>Tabela de Funcionários</h2>
+
+    <table id="example" class="display nowrap" style="width:100%">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Cargo</th>
+          <th>Salário</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+
+</body>
+
+<script>
+  var minhaUrl =
+    "https://script.google.com/macros/s/AKfycbwh9kuKrtFlHLIyVfnio7uHDmvO-QDkUxMexMAkUHDdp351sTs7B2fS4WcIh7OJZsjk/exec";
+
+  $(document).ready(function () {
+    var user_name = localStorage.getItem('user_name');
+    var password = localStorage.getItem('password');
+
+    if (user_name == "") {
+      document.getElementById('divMeuLogin').style.display = "block";
+
+    } else {
+      $.ajax({
+        type: "POST",
+        data: {
+          qualFuncao: "autenticacao",
+          user_name: user_name,
+          password: password,
+        },
+        url: minhaUrl,
+      }).done(function (data) {
+        //console.log(data);
+        if (data == "true") {
+          // USUÁRIO LOGADO
+          document.getElementById('divMeuLogout').style.display = "block";
+          document.getElementById('menuDeNavegacao').style.display = 'block';
+          document.getElementById('usuarioLogado').innerHTML = 'Bem vindo(a), ' + user_name;
+        } else {
+          // USUÁRIO NÃO-LOGADO
+          document.getElementById('divMeuLogin').style.display = "block";
+          //document.getElementById('divMeuLogout').style.display = "none";
+        }
+      });
+    };
+  });
+
+  function btn_login() {
+    var user_name = document.getElementById("user_name").value;
+    var password = document.getElementById("password").value;
+
+    localStorage.setItem('user_name', '');
+    localStorage.setItem('password', '');
+
+    localStorage.setItem('user_name', user_name);
+    localStorage.setItem('password', password);
+
+    $.ajax({
+      type: "POST",
+      data: {
+        qualFuncao: "autenticacao",
+        user_name: user_name,
+        password: password,
+      },
+      url: minhaUrl,
+    }).done(function (data) {
+
+      if (data == "true") {
+        // USUÁRIO LOGADO
+        console.log("Usuário Logado.");
+
+        document.getElementById('divMeuLogout').style.display = "block";
+        document.getElementById('menuDeNavegacao').style.display = 'block';
+        document.getElementById('divMeuLogin').style.display = "none";
+        document.getElementById('usuarioLogado').innerHTML = 'Bem vindo(a), ' + user_name;
+
+        console.log("Usuário: " + user_name);
+        console.log("Senha: " + password);
+
+      } else {
+        // USUÁRIO NÃO-LOGADO
+        alert("Usuário não Localizado!")
+        console.log("Usuário não Localizado!")
+        document.getElementById('divMeuLogin').style.display = "block";
+        //document.getElementById('divMeuLogout').style.display = "none";
+      };
+    });
+  }
+
+  function btn_logout() {
+    var user_name = document.getElementById("user_name").value;
+    var password = document.getElementById("password").value;
+
+    localStorage.setItem('user_name', '');
+    localStorage.setItem('password', '');
+
+    document.getElementById('divMeuLogin').style.display = "block";
+    document.getElementById('divMeuLogout').style.display = "none";
+    document.getElementById('menuDeNavegacao').style.display = 'none';
+    document.getElementById('divTabelaDeFuncionarios').style.display = 'none';
+    document.getElementById('formularioDeCadastroDeFuncionario').style.display = 'none';
+
+    try {
+      $("#example").DataTable().clear();
+      $("#example").DataTable().destroy();
+    } catch (e) {
+      console.log(e);
+    }
+
+    document.getElementById("user_name").value = "";
+    document.getElementById("password").value = "";
+  }
+
+  function excluirEsteId() {
+    var idDoFuncionario = document.getElementById('idDoFuncionario').value;
+
+    ////////  PARTE DA AUTENTICAÇÃO DO USUÁRIO ////////////////       
+    var user_name = localStorage.getItem('user_name');
+    var password = localStorage.getItem('password');
+    /////////////////////////////////////////////////////////
+
+    if (idDoFuncionario == "") {
+      alert('Selecione o Funcionário a ser Excluído!');
+    } else {
+      $.ajax({
+        type: "POST",
+        data: {
+          qualFuncao: "remover_funcionario",
+          idDoFuncionario: idDoFuncionario,
+          user_name: user_name,
+          password: password,
+        },
+        url: minhaUrl,
+      }).done(function () {
+        alert("Funcionário Excluído com Sucesso!");
+        abreTabelaDeFuncionarios();
+      });
+    };
+  }
+
+  function abreCadastroDeFuncionarios() {
+    document.getElementById("formularioDeCadastroDeFuncionario").style.display = "block";
+    document.getElementById("divTabelaDeFuncionarios").style.display = "none";
+  }
+
+  function abreTabelaDeFuncionarios() {
+    document.getElementById("divTabelaDeFuncionarios").style.display = "block";
+    document.getElementById("formularioDeCadastroDeFuncionario").style.display = "none";
+    lerDadosDaTabela();
+  }
+
+  function disparaAoClicar() {
+    var idDoFuncionario = document.getElementById("idDoFuncionario").value;
+    var nomeDoFuncionario = document.getElementById("nomeDoFuncionario").value;
+    var cargoDoFuncionario = document.getElementById("cargoDoFuncionario").value;
+    var salarioDoFuncionario = document.getElementById("salarioDoFuncionario").value;
+
+    ////////  PARTE DA AUTENTICAÇÃO DO USUÁRIO ////////////////   
+    var user_name = localStorage.getItem('user_name');
+    var password = localStorage.getItem('password');
+    /////////////////////////////////////////////////////////
+
+    $.ajax({
+      type: "POST",
+      data: {
+        qualFuncao: 'entradaDeFuncionario',
+        idDoFuncionario: idDoFuncionario,
+        nomeDoFuncionario: nomeDoFuncionario,
+        cargoDoFuncionario: cargoDoFuncionario,
+        salarioDoFuncionario: salarioDoFuncionario,
+        user_name: user_name,
+        password: password,
+      },
+      url: minhaUrl,
+    }).done(function () {
+      document.getElementById("idDoFuncionario").value = " ";
+      document.getElementById("nomeDoFuncionario").value = " ";
+      document.getElementById("cargoDoFuncionario").value = " ";
+      document.getElementById("salarioDoFuncionario").value = " ";
+
+      alert('Funcionário Cadastrado com Sucesso!');
+      abreTabelaDeFuncionarios();
+    })
+  }
+
+  function lerDadosDaTabela() {
+    ////////  PARTE DA AUTENTICAÇÃO DO USUÁRIO ////////////////   
+    var user_name = localStorage.getItem('user_name');
+    var password = localStorage.getItem('password');
+    /////////////////////////////////////////////////////////
+
+    $.ajax({
+      type: "POST",
+      data: {
+        user_name: user_name,
+        password: password,
+        qualFuncao: 'lerFuncionarios',
+      },
+      url: minhaUrl,
+    }).done(function (data) {
+
+      try {
+        $("#example").DataTable().clear();
+        $("#example").DataTable().destroy();
+      } catch (e) {
+        console.log(e);
+      }
+
+      // GERAÇÃO DA TABELA
+      var data = JSON.parse(data);
+
+      new DataTable("#example", {
+        data: data,
+        deferRender: true,
+        scrollCollapse: true,
+        scroller: true,
+        scrollY: 200,
+      });
+
+      // ADICIONANDO UM LISTINER
+      var table = $('#example').DataTable();
+      $('#example tbody').on('click', 'tr', function () {
+        abreCadastroDeFuncionarios();
+        var data = table.row(this).data();
+        document.getElementById("idDoFuncionario").value = data[0];
+        document.getElementById("nomeDoFuncionario").value = data[1];
+        document.getElementById("cargoDoFuncionario").value = data[2];
+        document.getElementById("salarioDoFuncionario").value = data[3];
+      });
+    });
+  }
+</script>
+
+</html>
