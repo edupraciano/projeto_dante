@@ -26,20 +26,72 @@
     #divTabelaDeFuncionarios {
       display: none;
     }
+
+    /* #divMeuLogin {
+      display: none;
+    } */
+
+    /* #divMeuLogout {
+      display: none;
+    }
+    */
+
+    #menuDeNavegacao {
+      display: none;
+    }
   </style>
 
 </head>
 
 <body>
 
-  <div>
+  <div id="divMeuLogin">
     <label for="user_name">Usuário</label>
     <input type="text" name="" id="user_name">
     <label for="password">Senha</label>
     <input type="password" name="" id="password">
     <button onclick="btn_login()">Entrar</button>
+  </div>
+
+  <div id="divMeuLogout">
+    <h3 id="usuarioLogado"></h3>
     <button onclick="btn_logout()">Sair</button>
   </div>
+
+  <script>
+    function btn_login() {
+      var user_name = document.getElementById("user_name").value;
+      var password = document.getElementById("password").value;
+
+      localStorage.setItem('user_name', '');
+      localStorage.setItem('password', '');
+
+      localStorage.setItem('user_name', user_name);
+      localStorage.setItem('password', password);
+
+      $.ajax({
+        type: "POST",
+        data: {
+          qualFuncao: "autenticacao",
+          user_name: user_name,
+          password: password,
+        },
+        url: minhaUrl,
+      }).done(function (data) {
+        location.reload();
+      });
+    }
+
+    function btn_logout() {
+      var user_name = document.getElementById("user_name").value;
+      var password = document.getElementById("password").value;
+
+      localStorage.setItem('user_name', '');
+      localStorage.setItem('password', '');
+
+      location.reload();
+    }
+  </script>
 
   <div id="menuDeNavegacao">
     <button onclick="abreCadastroDeFuncionarios()">Formulário de Cadastro</button>
@@ -94,17 +146,44 @@
 
 <script>
   var minhaUrl =
-    "https://script.google.com/macros/s/AKfycbzk9EsptA9Rs0tFCH2XN47l8LlASQbtABFjNDyejAwZPKb5iw_LfJAr7Rtr96jF7TpV/exec";
+    "https://script.google.com/macros/s/AKfycbxmSN0hM-cRoJfEcD4GdNBzzALXj-BYLQUrwHuVzb6vp9TIOQEFmm9cJiDFBCaQSgI1/exec";
+
+  $(document).ready(function () {
+    var user_name = localStorage.getItem('user_name');
+    var password = localStorage.getItem('password');
+
+    $.ajax({
+      type: "POST",
+      data: {
+        qualFuncao: "autenticacao",
+        user_name: user_name,
+        password: password,
+      },
+      url: minhaUrl,
+    }).done(function (data) {
+
+      if (data == "true") {
+        // USUÁRIO LOGADO
+        document.getElementById('divMeuLogout').style.display = "block";
+        document.getElementById('menuDeNavegacao').style.display = 'block';
+        document.getElementById('usuarioLogado').innerHTML = 'Bem vindo(a), ' + user_name;
+      } else {
+        // USUÁRIO NÃO-LOGADO
+        document.getElementById('divMeuLogin').style.display = "block";
+        //document.getElementById('divMeuLogout').style.display = "none";
+      }
+    });
+  });
+
+
 
   function excluirEsteId() {
-    ////////  PARTE DA AUTENTICAÇÃO DO USUÁRIO ////////////////   
-    var coockie_split = document.cookie.split(';');
-    user_name = coockie_split[0].split('=')[1];
-    password = coockie_split[1].split('=')[1];
-    console.log(user_name);
-    console.log(password);
-    /////////////////////////////////////////////////////////
     var idDoFuncionario = document.getElementById('idDoFuncionario').value;
+
+    ////////  PARTE DA AUTENTICAÇÃO DO USUÁRIO ////////////////       
+    var user_name = localStorage.getItem('user_name');
+    var password = localStorage.getItem('password');
+    /////////////////////////////////////////////////////////
 
     if (idDoFuncionario == "") {
       alert('Selecione o Funcionário a ser Excluído!')
@@ -143,11 +222,8 @@
     var salarioDoFuncionario = document.getElementById("salarioDoFuncionario").value;
 
     ////////  PARTE DA AUTENTICAÇÃO DO USUÁRIO ////////////////   
-    var coockie_split = document.cookie.split(';');
-    user_name = coockie_split[0].split('=')[1];
-    password = coockie_split[1].split('=')[1];
-    console.log(user_name);
-    console.log(password);
+    var user_name = localStorage.getItem('user_name');
+    var password = localStorage.getItem('password');
     /////////////////////////////////////////////////////////
 
     $.ajax({
@@ -175,11 +251,8 @@
 
   function lerDadosDaTabela() {
     ////////  PARTE DA AUTENTICAÇÃO DO USUÁRIO ////////////////   
-    var coockie_split = document.cookie.split(';');
-    user_name = coockie_split[0].split('=')[1];
-    password = coockie_split[1].split('=')[1];
-    console.log(user_name);
-    console.log(password);
+    var user_name = localStorage.getItem('user_name');
+    var password = localStorage.getItem('password');
     /////////////////////////////////////////////////////////
 
     $.ajax({
@@ -220,43 +293,6 @@
         document.getElementById("salarioDoFuncionario").value = data[3];
       });
     });
-  }
-
-  function btn_login() {
-    var user_name = document.getElementById("user_name").value;
-    var password = document.getElementById("password").value;
-
-    document.cookie = 'user_name=;';
-    document.cookie = 'password=;';
-
-    document.cookie = 'user_name=' + user_name;
-    document.cookie = 'password=' + password;
-
-    var coockie_split = document.cookie.split(';');
-
-    console.log(coockie_split[0].split('=')[1]);
-    console.log(coockie_split[1].split('=')[1]);
-
-    $.ajax({
-      type: "POST",
-      data: {
-        qualFuncao: "autenticacao",
-        user_name: user_name,
-        password: password,
-      },
-      url: minhaUrl,
-    }).done(function (data) {
-      console.log(data);
-    });
-  }
-
-  function btn_logout() {
-    var user_name = document.getElementById("user_name").value;
-    var password = document.getElementById("password").value;
-
-    document.cookie = 'user_name=;';
-    document.cookie = 'password=;';
-    location.reload();
   }
 </script>
 
